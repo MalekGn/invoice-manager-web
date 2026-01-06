@@ -1,0 +1,10 @@
+services:
+  app:
+    build: .
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - ./data:/app/data
+    environment:
+      - DATA_FILE_PATH=/app/data/invoices.json
