@@ -4,4 +4,5 @@ export interface Supplier {
     vatNumber: string;
     address: string;
     email: string;
+    companyId: string;
 }

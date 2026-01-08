@@ -5,9 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { Moon, Sun, FileText, Users, Activity, Settings, LayoutDashboard } from "lucide-react";
+import { Moon, Sun, FileText, Users, Activity, Settings, LayoutDashboard, User } from "lucide-react";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useNavbarColor } from "./NavbarColorContext";
+import CompanySwitcher from "./CompanySwitcher";
 
 /**
  * Determines if a hex color is light or dark.
@@ -46,6 +47,11 @@ export default function Navbar() {
     const currentLocale = pathname.split('/')[1] || 'en';
     const { data: session } = useSession();
     const { navbarColor } = useNavbarColor();
+
+    const user = session?.user as any;
+    const isAdmin = user && ['COMPANY_ADMIN', 'GLOBAL_ADMIN'].includes(user.role);
+    const isGlobalAdmin = user?.role === 'GLOBAL_ADMIN';
+
     const isLight = isLightColor(navbarColor);
     const borderColor = darkenColor(navbarColor, 10);
     const activeLinkTextColor = isLight ? 'text-gray-900' : 'text-gray-900'; // Active link on white bg
@@ -58,6 +64,7 @@ export default function Navbar() {
         { href: `/${currentLocale}/invoices`, label: t('invoices'), icon: FileText },
         { href: `/${currentLocale}/products`, label: t('products'), icon: Activity },
         { href: `/${currentLocale}/clients`, label: t('clients'), icon: Users },
+        ...(isAdmin ? [{ href: `/${currentLocale}/settings/users`, label: 'Users', icon: Users }] : []),
         { href: `/${currentLocale}/settings`, label: t('settings'), icon: Settings },
     ];
 
@@ -104,6 +111,7 @@ export default function Navbar() {
                     </div>
 
                     <div className="flex items-center space-x-3">
+                        {isGlobalAdmin && <CompanySwitcher />}
                         <div className="hidden sm:block">
                             <LanguageSwitcher />
                         </div>

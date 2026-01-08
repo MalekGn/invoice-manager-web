@@ -20,6 +20,7 @@ export interface Invoice {
     type?: 'sale' | 'purchase'; // Optional for backward compatibility, defaults to 'sale'
     items?: InvoiceItem[];
     clientId?: string;
+    companyId: string;
     // New fields for professional layout
     poNumber?: string;
     jobNo?: string;

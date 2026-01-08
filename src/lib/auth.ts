@@ -29,7 +29,10 @@ export const authOptions: NextAuthOptions = {
                     id: user.id,
                     name: user.name,
                     email: user.email,
-                };
+                    role: user.role,
+                    companyId: user.companyId,
+                    username: user.username
+                } as any;
             }
         })
     ],
@@ -43,12 +46,21 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
+                token.role = (user as any).role;
+                token.companyId = (user as any).companyId;
+                token.username = (user as any).username;
+                // Initialize activeCompanyId for Global Admin contexts
+                token.activeCompanyId = null;
             }
             return token;
         },
         async session({ session, token }) {
             if (session.user) {
                 (session.user as any).id = token.id;
+                (session.user as any).role = token.role;
+                (session.user as any).companyId = token.companyId;
+                (session.user as any).username = token.username;
+                (session.user as any).activeCompanyId = token.activeCompanyId;
             }
             return session;
         }

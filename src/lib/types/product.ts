@@ -7,4 +7,5 @@ export interface Product {
     vatRate: number;
     stockQuantity: number;
     category?: string;
+    companyId: string;
 }

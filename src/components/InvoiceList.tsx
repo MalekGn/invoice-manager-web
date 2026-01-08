@@ -8,6 +8,7 @@ import Link from "next/link";
 export default function InvoiceList({ invoices }: { invoices: Invoice[] }) {
     const tTable = useTranslations("Table");
     const tForm = useTranslations("Form");
+    const tAuth = useTranslations("Auth");
     const locale = useLocale();
 
     if (invoices.length === 0) {
@@ -19,8 +20,8 @@ export default function InvoiceList({ invoices }: { invoices: Invoice[] }) {
             <table className="w-full text-left border-collapse">
                 <thead>
                     <tr className="border-b dark:border-zinc-700 text-gray-600 dark:text-gray-400">
-                        <th className="p-3">{tTable('customer')} / {useTranslations('Auth')('supplier')}</th>
-                        <th className="p-3">{useTranslations('Auth')('type')}</th>
+                        <th className="p-3">{tTable('customer')} / {tAuth('supplier')}</th>
+                        <th className="p-3">{tAuth('type')}</th>
                         <th className="p-3">{tTable('date')}</th>
                         <th className="p-3">{tTable('amount')}</th>
                         <th className="p-3">{tTable('status')}</th>
@@ -37,7 +38,7 @@ export default function InvoiceList({ invoices }: { invoices: Invoice[] }) {
                             </td>
                             <td className="p-3">
                                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase border ${invoice.type === 'purchase' ? 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-800' : 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800'}`}>
-                                    {invoice.type === 'purchase' ? useTranslations('Auth')('purchase').split(' ')[0] : useTranslations('Auth')('sale').split(' ')[0]}
+                                    {invoice.type === 'purchase' ? tAuth('purchase').split(' ')[0] : tAuth('sale').split(' ')[0]}
                                 </span>
                             </td>
                             <td className="p-3 text-sm text-gray-500 dark:text-gray-400">

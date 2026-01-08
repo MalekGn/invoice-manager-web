@@ -7,11 +7,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  GLOBAL_ADMIN
+  COMPANY_ADMIN
+  USER
+}
+
+model Company {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  users     User[]
+  clients   Client[]
+  suppliers Supplier[]
+  products  Product[]
+  invoices  Invoice[]
+}
+
 model User {
-  id       String  @id @default(uuid())
-  email    String  @unique
-  password String?
-  name     String?
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String?
+  name      String?
+  bio       String?
+  avatar    String?
+  role      Role     @default(USER)
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
 }
 
 model Client {
@@ -21,6 +44,8 @@ model Client {
   address   String?
   vatNumber String?
   invoices  Invoice[]
+  companyId String
+  company   Company   @relation(fields: [companyId], references: [id])
 }
 
 model Supplier {
@@ -29,6 +54,8 @@ model Supplier {
   vatNumber String
   address   String
   email     String
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
 }
 
 model Product {
@@ -40,6 +67,8 @@ model Product {
   vatRate       Float
   stockQuantity Int
   category      String?
+  companyId     String
+  company       Company @relation(fields: [companyId], references: [id])
 }
 
 model Invoice {
@@ -62,6 +91,8 @@ model Invoice {
   notes          String?
   terms          String?
   items          InvoiceItem[]
+  companyId      String
+  company        Company       @relation(fields: [companyId], references: [id])
 }
 
 model InvoiceItem {

@@ -42,7 +42,16 @@ The application follows a modular architecture designed for scalability and main
    ```
 
 2. **Configure Environment Variables**:
-   Create a `.env` file with your `DATABASE_URL` and `NEXTAUTH_SECRET`.
+   The application uses environment variables for database connection and authentication.
+   
+   - Copy the template file:
+     ```bash
+     cp .env.example .env
+     ```
+   - Open `.env` and fill in the following variables:
+     - `DATABASE_URL`: Your PostgreSQL connection string (e.g., `postgresql://user:password@localhost:5432/invoice_db`).
+     - `NEXTAUTH_SECRET`: A random string used to hash tokens and sign cookies. You can generate one using `openssl rand -base64 32`.
+     - `NEXTAUTH_URL`: (Optional for local dev) The base URL of your application (usually `http://localhost:3000`).
 
 3. **Database Setup**:
    ```bash

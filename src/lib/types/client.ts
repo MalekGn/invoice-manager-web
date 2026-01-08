@@ -4,4 +4,5 @@ export interface Client {
     email?: string;
     address?: string;
     vatNumber?: string;
+    companyId: string;
 }

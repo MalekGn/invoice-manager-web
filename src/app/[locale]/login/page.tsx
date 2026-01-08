@@ -5,19 +5,22 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { registerUser } from "@/lib/actions";
+import { registerUser, registerOrganization } from "@/lib/actions";
 
 export default function AuthPage() {
     const router = useRouter();
     const t = useTranslations("Auth");
 
     const [isLogin, setIsLogin] = useState(true);
+    const [isOrg, setIsOrg] = useState(false);
     const [loading, setLoading] = useState(false);
 
     // Form States
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
+    const [companyName, setCompanyName] = useState("");
+    const [username, setUsername] = useState("");
 
     const [error, setError] = useState("");
 
@@ -48,7 +51,11 @@ export default function AuthPage() {
         setError("");
 
         try {
-            await registerUser({ name, email, password });
+            if (isOrg) {
+                await registerOrganization({ companyName, name, email, password, username });
+            } else {
+                await registerUser({ name, email, password, username });
+            }
             // On success, switch to login or auto-login
             // For simplicity, switch to Login view and pre-fill
             setIsLogin(true);
@@ -64,6 +71,7 @@ export default function AuthPage() {
     const toggleMode = () => {
         setIsLogin(!isLogin);
         setError("");
+        setIsOrg(false);
     }
 
     return (
@@ -71,36 +79,88 @@ export default function AuthPage() {
             <div className="w-full max-w-md space-y-8 bg-card p-8 rounded-xl border shadow-sm">
                 <div>
                     <h2 className="text-center text-3xl font-bold tracking-tight text-foreground">
-                        {isLogin ? t('signInTitle') : t('signUpTitle')}
+                        {isLogin ? t('signInTitle') : (isOrg ? t('createOrganization') : t('signUpTitle'))}
                     </h2>
                     <p className="mt-2 text-center text-sm text-muted-foreground">
-                        {isLogin ? t('loginWelcome') : t('signUpWelcome')}
+                        {isLogin ? t('loginWelcome') : (isOrg ? t('organizationWelcome') : t('signUpWelcome'))}
                     </p>
                 </div>
 
-                <form className="mt-8 space-y-6" onSubmit={isLogin ? handleLogin : handleRegister}>
+                {!isLogin && (
+                    <div className="flex justify-center space-x-2 p-1 bg-muted rounded-lg">
+                        <button
+                            onClick={() => setIsOrg(false)}
+                            className={`flex-1 py-1 text-xs font-medium rounded ${!isOrg ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
+                        >
+                            {t('individual')}
+                        </button>
+                        <button
+                            onClick={() => setIsOrg(true)}
+                            className={`flex-1 py-1 text-xs font-medium rounded ${isOrg ? 'bg-background shadow-sm' : 'text-muted-foreground'}`}
+                        >
+                            {t('organization')}
+                        </button>
+                    </div>
+                )}
+
+                <form className="mt-4 space-y-4" onSubmit={isLogin ? handleLogin : handleRegister}>
                     <div className="space-y-4">
-                        {!isLogin && (
+                        {!isLogin && isOrg && (
                             <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-foreground">
-                                    {t('fullName')}
+                                <label htmlFor="companyName" className="block text-sm font-medium text-foreground">
+                                    {t('companyName')}
                                 </label>
                                 <input
-                                    id="name"
-                                    name="name"
+                                    id="companyName"
+                                    name="companyName"
                                     type="text"
-                                    required={!isLogin}
+                                    required={isOrg}
                                     className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                    placeholder="John Doe"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="Acme Corp"
+                                    value={companyName}
+                                    onChange={(e) => setCompanyName(e.target.value)}
                                 />
                             </div>
                         )}
 
+                        {!isLogin && (
+                            <>
+                                <div>
+                                    <label htmlFor="name" className="block text-sm font-medium text-foreground">
+                                        {t('fullName')}
+                                    </label>
+                                    <input
+                                        id="name"
+                                        name="name"
+                                        type="text"
+                                        required={!isLogin}
+                                        className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                        placeholder="John Doe"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="username" className="block text-sm font-medium text-foreground">
+                                        {t('username')}
+                                    </label>
+                                    <input
+                                        id="username"
+                                        name="username"
+                                        type="text"
+                                        required={!isLogin}
+                                        className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                        placeholder="johndoe"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                    />
+                                </div>
+                            </>
+                        )}
+
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-foreground">
-                                {t('email')}
+                                {t('emailAddress')}
                             </label>
                             <input
                                 id="email"
@@ -123,7 +183,7 @@ export default function AuthPage() {
                                 id="password"
                                 name="password"
                                 type="password"
-                                autoComplete={isLogin ? "current-password" : "new-password"}
+                                autoComplete="current-password"
                                 required
                                 className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                                 placeholder="••••••••"
@@ -134,29 +194,26 @@ export default function AuthPage() {
                     </div>
 
                     {error && (
-                        <div className="text-destructive text-sm text-center bg-destructive/10 p-2 rounded">
+                        <div className="text-sm font-medium text-destructive bg-destructive/10 p-3 rounded-md">
                             {error}
                         </div>
                     )}
 
-                    <div>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="group relative flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary hover:opacity-90 transition-opacity disabled:opacity-50"
-                        >
-                            {loading ? t('processing') : (isLogin ? t('login') : t('signUp'))}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="flex w-full justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        {loading ? t('loading') : (isLogin ? t('signIn') : t('signUp'))}
+                    </button>
                 </form>
 
-                <div className="text-center text-sm">
+                <div className="text-center">
                     <button
                         onClick={toggleMode}
-                        type="button"
-                        className="font-medium text-primary hover:text-primary/80 transition-colors"
+                        className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
                     >
-                        {isLogin ? t('noAccount') : t('hasAccount')}
+                        {isLogin ? t('dontHaveAccount') : t('alreadyHaveAccount')}
                     </button>
                 </div>
             </div>
