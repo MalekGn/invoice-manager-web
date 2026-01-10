@@ -1,5 +1,5 @@
 {
-  "name": "invoice-manager",
+  "name": "invoice-manager-web",
   "version": "1.0.0-alpha",
   "private": true,
   "scripts": {
